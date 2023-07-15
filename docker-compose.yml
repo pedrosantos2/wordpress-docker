@@ -1,0 +1,56 @@
+version: "6.2.2"
+services:
+  db:
+    image: mariadb:latest
+    platform: linux/amd64
+    volumes:
+      - ./db_data:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_TCP_PORT: 3306
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: wordpress
+    ports:
+      - "3306:3306"
+    networks:
+      - wordpress_demo
+
+  phpmyadmin:
+    image: phpmyadmin
+    restart: always
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    ports:
+      - 8080:80
+     depends_on:
+      - db
+      
+  wordpress:
+    image: wordpress:latest
+    volumes:
+      - ./wordpress_data:/var/www/html
+    restart: always
+    platform: linux/amd64
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: wordpress
+      WORDPRESS_DB_NAME: wordpress
+    ports:
+      - "8001:80"
+    depends_on:
+      - db
+    networks:
+      - wordpress_demo
+
+networks:
+  wordpress_demo:
+    driver: bridge
+volumes:
+  db_data:
+  phpmyadmin_data:
+  wordpress_data:
